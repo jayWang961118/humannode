@@ -94,7 +94,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
                     account_id("Ferdie//stash"),
                 ],
                 robonode_public_key,
-                vec![account_id("Alice")],
+                vec![account_id("Alice"), account_id("Bob")],
             )
         },
         // Bootnodes

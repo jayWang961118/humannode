@@ -5,10 +5,10 @@ edition = "2021"
 publish = false
 
 [dependencies]
-pallet-im-online = { default-features = false, git = "https://github.com/humanode-network/substrate", branch = "locked/humanode-2022-09-21" }
-sp-consensus-babe = { default-features = false, git = "https://github.com/humanode-network/substrate", branch = "locked/humanode-2022-09-21" }
-sp-finality-grandpa = { default-features = false, git = "https://github.com/humanode-network/substrate", branch = "locked/humanode-2022-09-21" }
-sp-runtime = { default-features = false, git = "https://github.com/humanode-network/substrate", branch = "locked/humanode-2022-09-21" }
+pallet-im-online = { default-features = false, git = "https://github.com/humanode-network/substrate", branch = "time-warp" }
+sp-consensus-babe = { default-features = false, git = "https://github.com/humanode-network/substrate", branch = "time-warp" }
+sp-finality-grandpa = { default-features = false, git = "https://github.com/humanode-network/substrate", branch = "time-warp" }
+sp-runtime = { default-features = false, git = "https://github.com/humanode-network/substrate", branch = "time-warp" }
 
 [features]
 default = ["std"]
