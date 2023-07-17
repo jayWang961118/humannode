@@ -5900,8 +5900,11 @@ dependencies = [
  "frame-system",
  "pallet-balances",
  "pallet-evm-balances",
+ "pallet-evm-system",
+ "pallet-pot",
  "parity-scale-codec",
  "scale-info",
+ "sp-core",
 ]
 
 [[package]]

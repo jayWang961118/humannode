@@ -5,6 +5,9 @@
 use frame_support::traits::{Currency, StorageVersion};
 pub use pallet::*;
 
+#[cfg(test)]
+mod mock;
+
 /// The current storage version.
 const STORAGE_VERSION: StorageVersion = StorageVersion::new(0);
 
