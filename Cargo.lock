@@ -5893,6 +5893,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-bridge-pot-balances"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-balances",
+ "pallet-evm-balances",
+ "parity-scale-codec",
+ "scale-info",
+]
+
+[[package]]
 name = "pallet-chain-properties"
 version = "0.1.0"
 dependencies = [
