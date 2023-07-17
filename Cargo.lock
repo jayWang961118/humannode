@@ -5896,15 +5896,19 @@ dependencies = [
 name = "pallet-bridge-pot-balances"
 version = "0.1.0"
 dependencies = [
+ "fp-evm",
  "frame-support",
  "frame-system",
  "pallet-balances",
+ "pallet-evm",
  "pallet-evm-balances",
  "pallet-evm-system",
  "pallet-pot",
+ "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
+ "sp-std",
 ]
 
 [[package]]
