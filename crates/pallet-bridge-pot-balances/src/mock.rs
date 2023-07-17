@@ -10,10 +10,13 @@ use frame_support::{
         traits::{BlakeTwo256, IdentityLookup},
         BuildStorage,
     },
-    traits::{ConstU32, ConstU64},
-    PalletId,
+    traits::{ConstU32, ConstU64, FindAuthor},
+    weights::Weight,
+    ConsensusEngineId, PalletId,
 };
-use sp_core::{H160, H256};
+use pallet_evm::{EnsureAddressNever, FixedGasWeightMapping, IdentityAddressMapping};
+use sp_core::{H160, H256, U256};
+use sp_std::str::FromStr;
 
 use crate::{self as pallet_bridge_pot_balances};
 
@@ -34,7 +37,9 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system,
+        Timestamp: pallet_timestamp,
         Balances: pallet_balances,
+        EVM: pallet_evm,
         EvmSystem: pallet_evm_system,
         EvmBalances: pallet_evm_balances,
         NativeToEvmSwapBridgePot: pallet_pot::<Instance1>,
@@ -70,6 +75,16 @@ impl frame_system::Config for Test {
     type MaxConsumers = ConstU32<16>;
 }
 
+parameter_types! {
+    pub const MinimumPeriod: u64 = 1000;
+}
+impl pallet_timestamp::Config for Test {
+    type Moment = u64;
+    type OnTimestampSet = ();
+    type MinimumPeriod = MinimumPeriod;
+    type WeightInfo = ();
+}
+
 impl pallet_balances::Config for Test {
     type Balance = u64;
     type RuntimeEvent = RuntimeEvent;
@@ -98,6 +113,54 @@ impl pallet_evm_balances::Config for Test {
     type ExistentialDeposit = ConstU64<EXISTENTIAL_DEPOSIT_EVM>;
     type AccountStore = EvmSystem;
     type DustRemoval = ();
+}
+
+pub struct FixedGasPrice;
+
+impl pallet_evm::FeeCalculator for FixedGasPrice {
+    fn min_gas_price() -> (U256, Weight) {
+        // Return some meaningful gas price and weight
+        (1_000_000_000u128.into(), Weight::from_ref_time(7u64))
+    }
+}
+
+pub struct FindAuthorTruncated;
+
+impl FindAuthor<H160> for FindAuthorTruncated {
+    fn find_author<'a, I>(_digests: I) -> Option<H160>
+    where
+        I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
+    {
+        Some(H160::from_str("1234500000000000000000000000000000000000").unwrap())
+    }
+}
+
+parameter_types! {
+    pub BlockGasLimit: U256 = U256::max_value();
+    pub WeightPerGas: Weight = Weight::from_ref_time(20_000);
+}
+
+impl pallet_evm::Config for Test {
+    type AccountProvider = EvmSystem;
+    type FeeCalculator = FixedGasPrice;
+    type GasWeightMapping = FixedGasWeightMapping<Self>;
+    type WeightPerGas = WeightPerGas;
+    type BlockHashMapping = pallet_evm::SubstrateBlockHashMapping<Self>;
+    type CallOrigin =
+        EnsureAddressNever<<Self::AccountProvider as pallet_evm::AccountProvider>::AccountId>;
+    type WithdrawOrigin =
+        EnsureAddressNever<<Self::AccountProvider as pallet_evm::AccountProvider>::AccountId>;
+    type AddressMapping = IdentityAddressMapping;
+    type Currency = EvmBalances;
+    type RuntimeEvent = RuntimeEvent;
+    type PrecompilesType = ();
+    type PrecompilesValue = ();
+    type ChainId = ();
+    type BlockGasLimit = BlockGasLimit;
+    type Runner = pallet_evm::runner::stack::Runner<Self>;
+    type OnChargeTransaction = ();
+    type OnCreate = ();
+    type FindAuthor = FindAuthorTruncated;
 }
 
 parameter_types! {
