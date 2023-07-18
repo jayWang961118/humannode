@@ -2,9 +2,9 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::traits::{fungible::Inspect, Currency};
+use frame_support::traits::{fungible::Inspect, Currency, StorageVersion};
 pub use pallet::*;
-use primitives_currency_swap::CurrencySwap as CurrencySwapT;
+use primitives_currency_swap::{CurrencySwap as CurrencySwapT, GenesisVerifier};
 pub use weights::*;
 
 pub mod weights;
@@ -15,6 +15,9 @@ pub mod benchmarking;
 mod mock;
 #[cfg(test)]
 mod tests;
+
+/// The current storage version.
+const STORAGE_VERSION: StorageVersion = StorageVersion::new(0);
 
 /// Utility alias for easy access to [`primitives_currency_swap::CurrencySwap::From`] type from a given config.
 type FromCurrencyOf<T> = <<T as Config>::CurrencySwap as CurrencySwapT<
@@ -54,6 +57,7 @@ pub mod pallet {
     use super::*;
 
     #[pallet::pallet]
+    #[pallet::storage_version(STORAGE_VERSION)]
     #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(_);
 
@@ -75,8 +79,33 @@ pub mod pallet {
         /// Interface into currency swap implementation.
         type CurrencySwap: CurrencySwapT<Self::AccountId, Self::AccountIdTo>;
 
+        /// Interface into genesis verifier implementation.
+        type GenesisVerifier: GenesisVerifier;
+
         /// Weight information for extrinsics in this pallet.
         type WeightInfo: WeightInfo;
+    }
+
+    #[pallet::genesis_config]
+    pub struct GenesisConfig<T: Config>(PhantomData<T>);
+
+    // The default value for the genesis config type.
+    #[cfg(feature = "std")]
+    impl<T: Config> Default for GenesisConfig<T> {
+        fn default() -> Self {
+            Self(PhantomData)
+        }
+    }
+
+    // The build of genesis for the pallet.
+    #[pallet::genesis_build]
+    impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+        fn build(&self) {
+            assert!(
+                T::GenesisVerifier::verify(),
+                "invalid genesis currency swap related data"
+            );
+        }
     }
 
     #[pallet::event]

@@ -69,3 +69,9 @@ pub struct Error<I, E> {
     /// The original imbalance that was passed to the swap operation.
     pub incoming_imbalance: I,
 }
+
+/// The interface to verify currency swap related data at genesis.
+pub trait GenesisVerifier {
+    /// Verify currency swap related data.
+    fn verify() -> bool;
+}

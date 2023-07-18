@@ -118,10 +118,20 @@ mock! {
     }
 }
 
+mock! {
+    #[derive(Debug)]
+    pub GenesisVerifier {}
+
+    impl primitives_currency_swap::GenesisVerifier for GenesisVerifier {
+        fn verify() -> bool;
+    }
+}
+
 impl pallet_currency_swap::Config for Test {
     type RuntimeEvent = RuntimeEvent;
     type AccountIdTo = H160;
     type CurrencySwap = MockCurrencySwap;
+    type GenesisVerifier = MockGenesisVerifier;
     type WeightInfo = ();
 }
 
@@ -148,20 +158,9 @@ pub fn runtime_lock() -> std::sync::MutexGuard<'static, ()> {
     }
 }
 
-pub trait TestExternalitiesExt {
-    fn execute_with_ext<R, E>(&mut self, execute: E) -> R
-    where
-        E: for<'e> FnOnce(&'e ()) -> R;
-}
-
-impl TestExternalitiesExt for frame_support::sp_io::TestExternalities {
-    fn execute_with_ext<R, E>(&mut self, execute: E) -> R
-    where
-        E: for<'e> FnOnce(&'e ()) -> R,
-    {
-        let guard = runtime_lock();
-        let result = self.execute_with(|| execute(&guard));
-        drop(guard);
-        result
-    }
+pub fn with_runtime_lock<R>(f: impl FnOnce() -> R) -> R {
+    let lock = runtime_lock();
+    let res = f();
+    drop(lock);
+    res
 }
