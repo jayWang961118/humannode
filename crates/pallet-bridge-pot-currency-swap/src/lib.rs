@@ -4,18 +4,21 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::{
-    sp_runtime::traits::Convert,
+    sp_runtime::{
+        traits::{CheckedAdd, CheckedSub, Convert},
+        ArithmeticError,
+    },
     sp_std::marker::PhantomData,
-    traits::{fungible::Inspect, Currency, StorageVersion},
+    traits::{fungible, Currency, Get, StorageVersion},
 };
-mod balances_values;
 pub mod existence_optional;
 pub mod existence_required;
+mod upgrade_init;
 
-pub use self::balances_values::{Balanced, Error as BalancedError};
 pub use self::existence_optional::Marker as ExistenceOptional;
 pub use self::existence_required::Marker as ExistenceRequired;
 pub use self::pallet::*;
+pub use self::upgrade_init::InitBalanceProvider;
 
 #[cfg(test)]
 mod mock;
@@ -24,7 +27,7 @@ mod mock;
 mod tests;
 
 /// The current storage version.
-const STORAGE_VERSION: StorageVersion = StorageVersion::new(0);
+const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
 // We have to temporarily allow some clippy lints. Later on we'll send patches to substrate to
 // fix them at their end.
@@ -32,6 +35,7 @@ const STORAGE_VERSION: StorageVersion = StorageVersion::new(0);
 #[frame_support::pallet]
 pub mod pallet {
     use frame_support::{pallet_prelude::*, sp_runtime::traits::MaybeDisplay};
+    use frame_system::pallet_prelude::*;
     use sp_std::fmt::Debug;
 
     use super::*;
@@ -65,14 +69,14 @@ pub mod pallet {
 
         /// The currency to swap from.
         type CurrencyFrom: Currency<Self::AccountIdFrom>
-            + Inspect<
+            + fungible::Inspect<
                 Self::AccountIdFrom,
                 Balance = <Self::CurrencyFrom as Currency<Self::AccountIdFrom>>::Balance,
             >;
 
         /// The currency to swap to.
         type CurrencyTo: Currency<Self::AccountIdTo>
-            + Inspect<
+            + fungible::Inspect<
                 Self::AccountIdTo,
                 Balance = <Self::CurrencyTo as Currency<Self::AccountIdTo>>::Balance,
             >;
@@ -89,6 +93,9 @@ pub mod pallet {
 
         /// The account to take the balances from when sending the funds as part of the swap operation.
         type PotTo: Get<Self::AccountIdTo>;
+
+        /// The balance provider for the pot initialization.
+        type InitBalanceProvider: InitBalanceProvider<Self::AccountIdTo, Self::CurrencyTo>;
     }
 
     #[pallet::genesis_config]
@@ -107,14 +114,93 @@ pub mod pallet {
     impl<T: Config<I>, I: 'static> GenesisBuild<T, I> for GenesisConfig<T, I> {
         fn build(&self) {
             let pot_to_balance = T::CurrencyTo::total_balance(&T::PotTo::get());
-            match Balanced::<T, I>::expected_bridge_balance() {
+            match Pallet::<T, I>::expected_bridge_balance_at_to() {
                 Ok(expected_pot_to_balance) => assert!(
                     pot_to_balance == expected_pot_to_balance,
-                    "genesis bridge pot balances values not balanced"
+                    "invalid bridge balance value: got {pot_to_balance:?}, expected {expected_pot_to_balance:?}"
                 ),
-                Err(err) => panic!("error during bridge pot balance calculation: {err}",),
+                Err(err) => panic!(
+                    "error during bridge balance calculation: {err:?}",
+                ),
             }
         }
+    }
+
+    #[pallet::hooks]
+    impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
+        fn on_runtime_upgrade() -> Weight {
+            upgrade_init::on_runtime_upgrade::<T, I>()
+        }
+
+        #[cfg(feature = "try-runtime")]
+        fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
+            upgrade_init::pre_upgrade::<T, I>()
+        }
+
+        #[cfg(feature = "try-runtime")]
+        fn post_upgrade(state: Vec<u8>) -> Result<(), &'static str> {
+            upgrade_init::post_upgrade::<T, I>()
+        }
+    }
+}
+
+/// Swappable balance.
+pub fn swappable_balance<AccountId, C: Currency<AccountId>, B: Get<AccountId>>(
+) -> Result<C::Balance, ArithmeticError> {
+    let total = C::total_issuance();
+    let bridge = C::total_balance(&B::get());
+
+    let swappable = total
+        .checked_sub(&bridge)
+        .ok_or(ArithmeticError::Underflow)?;
+
+    Ok(swappable)
+}
+
+/// Bridge reserved balance.
+pub fn bridge_reserved_balance<AccountId, C: Currency<AccountId>, B: Get<AccountId>>(
+) -> Result<C::Balance, ArithmeticError> {
+    let bridge = C::total_balance(&B::get());
+    let ed = C::minimum_balance();
+
+    let reserved = bridge.checked_sub(&ed).ok_or(ArithmeticError::Underflow)?;
+
+    Ok(reserved)
+}
+
+impl<T: Config<I>, I: 'static> Pallet<T, I> {
+    /// The expected bridge balance.
+    pub fn expected_bridge_balance_at_to(
+    ) -> Result<<T::CurrencyTo as Currency<T::AccountIdTo>>::Balance, ArithmeticError> {
+        let to_ed = T::CurrencyTo::minimum_balance();
+        let swappable_at_from = T::BalanceConverter::convert(swappable_balance::<
+            T::AccountIdFrom,
+            T::CurrencyFrom,
+            T::PotFrom,
+        >()?);
+        to_ed
+            .checked_add(&swappable_at_from)
+            .ok_or(ArithmeticError::Underflow)
+    }
+
+    /// Verife swappable balance to be balanced with bridge reserved balance.
+    pub fn verify_swappable_balance() -> Result<bool, ArithmeticError> {
+        let is_balanced_from_to =
+            bridge_reserved_balance::<T::AccountIdTo, T::CurrencyTo, T::PotTo>()?
+                == T::BalanceConverter::convert(swappable_balance::<
+                    T::AccountIdFrom,
+                    T::CurrencyFrom,
+                    T::PotFrom,
+                >()?);
+
+        let is_balanced_to_from = T::BalanceConverter::convert(bridge_reserved_balance::<
+            T::AccountIdFrom,
+            T::CurrencyFrom,
+            T::PotFrom,
+        >()?)
+            == swappable_balance::<T::AccountIdTo, T::CurrencyTo, T::PotTo>()?;
+
+        Ok(is_balanced_from_to && is_balanced_to_from)
     }
 }
 
