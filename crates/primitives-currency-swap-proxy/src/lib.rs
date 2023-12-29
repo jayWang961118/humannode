@@ -5,7 +5,7 @@
 
 use frame_support::{
     sp_std::marker::PhantomData,
-    traits::{Currency, OnUnbalanced},
+    traits::{fungible::Credit, OnUnbalanced},
 };
 use primitives_currency_swap::CurrencySwap;
 
@@ -21,15 +21,13 @@ type CurrencyToFor<T> = <<T as Config>::CurrencySwap as CurrencySwap<
     <T as Config>::AccountIdTo,
 >>::To;
 
-/// A utility type alias for easy access to [`Currency::NegativeImbalance`] of
+/// A utility type alias for easy access to [`Credit`] of
 /// [`CurrencySwap::From`] of [`Config::CurrencySwap`].
-type CurrencyFromNegativeImbalanceFor<T> =
-    <CurrencyFromFor<T> as Currency<<T as Config>::AccountIdFrom>>::NegativeImbalance;
+type CurrencyFromCreditFor<T> = Credit<<T as Config>::AccountIdFrom, CurrencyFromFor<T>>;
 
-/// A utility type alias for easy access to [`Currency::NegativeImbalance`] of
+/// A utility type alias for easy access to [`Credit`] of
 /// [`CurrencySwap::To`] of [`Config::CurrencySwap`].
-type CurrencyToNegativeImbalanceFor<T> =
-    <CurrencyToFor<T> as Currency<<T as Config>::AccountIdTo>>::NegativeImbalance;
+type CurrencyToCreditFor<T> = Credit<<T as Config>::AccountIdTo, CurrencyToFor<T>>;
 
 /// The general config for the currency swap proxy implementations.
 pub trait Config {
@@ -47,14 +45,13 @@ pub trait Config {
 /// If swap fails, will try to pass the original imbalance to the `Fallback`.
 pub struct SwapUnbalanced<T, To, Fallback>(PhantomData<(T, To, Fallback)>);
 
-impl<T, To, Fallback> OnUnbalanced<CurrencyFromNegativeImbalanceFor<T>>
-    for SwapUnbalanced<T, To, Fallback>
+impl<T, To, Fallback> OnUnbalanced<CurrencyFromCreditFor<T>> for SwapUnbalanced<T, To, Fallback>
 where
     T: Config,
-    To: OnUnbalanced<CurrencyToNegativeImbalanceFor<T>>,
-    Fallback: OnUnbalanced<CurrencyFromNegativeImbalanceFor<T>>,
+    To: OnUnbalanced<CurrencyToCreditFor<T>>,
+    Fallback: OnUnbalanced<CurrencyFromCreditFor<T>>,
 {
-    fn on_nonzero_unbalanced(amount: CurrencyFromNegativeImbalanceFor<T>) {
+    fn on_nonzero_unbalanced(amount: CurrencyFromCreditFor<T>) {
         let amount = match T::CurrencySwap::swap(amount) {
             Ok(amount) => amount,
             Err(primitives_currency_swap::Error {

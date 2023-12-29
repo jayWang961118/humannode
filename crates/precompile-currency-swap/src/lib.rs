@@ -6,8 +6,8 @@ use frame_support::{
     sp_runtime,
     sp_std::{marker::PhantomData, prelude::*},
     traits::{
-        fungible::Inspect,
-        tokens::{currency::Currency, Provenance},
+        fungible::{Balanced, Inspect},
+        tokens::{Fortitude, Precision, Preservation, Provenance},
     },
 };
 use pallet_evm::{
@@ -74,7 +74,7 @@ where
 /// Utility alias for easy access to the [`Currency::Balance`] of
 /// the [`primitives_currency_swap::CurrencySwap::From`] type.
 type FromBalanceFor<T, AccountIdFrom, AccountIdTo> =
-    <FromCurrencyFor<T, AccountIdFrom, AccountIdTo> as Currency<AccountIdFrom>>::Balance;
+    <FromCurrencyFor<T, AccountIdFrom, AccountIdTo> as Inspect<AccountIdFrom>>::Balance;
 
 /// Utility alias for easy access to [`primitives_currency_swap::CurrencySwap::From`] type.
 type FromCurrencyFor<T, AccountIdFrom, AccountIdTo> =
@@ -143,8 +143,9 @@ where
         let imbalance = CurrencySwapT::From::withdraw(
             &from,
             value,
-            frame_support::traits::WithdrawReasons::TRANSFER,
-            frame_support::traits::ExistenceRequirement::AllowDeath,
+            Precision::Exact,
+            Preservation::Expendable,
+            Fortitude::Force,
         )
         .map_err(|error| match error {
             sp_runtime::DispatchError::Token(sp_runtime::TokenError::FundsUnavailable) => {
@@ -159,14 +160,14 @@ where
 
         let imbalance = CurrencySwapT::swap(imbalance).map_err(|error| {
             // Here we undo the withdrawal to avoid having a dangling imbalance.
-            CurrencySwapT::From::resolve_creating(&from, error.incoming_imbalance);
+            CurrencySwapT::From::resolve(&from, error.incoming_imbalance);
             PrecompileFailure::Revert {
                 exit_status: ExitRevert::Reverted,
                 output: "unable to swap the currency".into(),
             }
         })?;
 
-        CurrencySwapT::To::resolve_creating(&to, imbalance);
+        CurrencySwapT::To::resolve(&to, imbalance);
 
         let logs_builder = LogsBuilder::new(handle.context().address);
 

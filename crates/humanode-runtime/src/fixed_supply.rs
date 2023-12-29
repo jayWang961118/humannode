@@ -3,7 +3,10 @@
 
 use core::marker::PhantomData;
 
-use frame_support::traits::{Currency, OnUnbalanced};
+use frame_support::traits::{
+    fungible::{Balanced, Inspect},
+    OnUnbalanced,
+};
 use sp_runtime::traits::UniqueSaturatedInto;
 
 use super::*;
@@ -18,11 +21,11 @@ pub struct EvmTransactionCharger<C, OU>(PhantomData<(C, OU)>);
 impl<T, C, OU> pallet_evm::OnChargeEVMTransaction<T> for EvmTransactionCharger<C, OU>
 where
     T: pallet_evm::Config,
-    C: Currency<EvmAccountIdOf<T>>,
-    OU: OnUnbalanced<<C as Currency<EvmAccountIdOf<T>>>::NegativeImbalance>,
-    U256: UniqueSaturatedInto<<C as Currency<EvmAccountIdOf<T>>>::Balance>,
+    C: Inspect<EvmAccountIdOf<T>> + Balanced<EvmAccountIdOf<T>>,
+    OU: OnUnbalanced<Credit<EvmAccountIdOf<T>, C>>,
+    U256: UniqueSaturatedInto<<C as Inspect<EvmAccountIdOf<T>>>::Balance>,
 {
-    type LiquidityInfo = Option<<C as Currency<EvmAccountIdOf<T>>>::NegativeImbalance>;
+    type LiquidityInfo = Option<<C as Inspect<EvmAccountIdOf<T>>>::NegativeImbalance>;
 
     fn withdraw_fee(who: &H160, fee: U256) -> Result<Self::LiquidityInfo, pallet_evm::Error<T>> {
         <pallet_evm::EVMCurrencyAdapter<C, OU> as pallet_evm::OnChargeEVMTransaction<T>>::withdraw_fee(who, fee)

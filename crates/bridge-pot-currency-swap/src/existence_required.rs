@@ -2,7 +2,11 @@
 
 use frame_support::{
     sp_runtime::{traits::Convert, DispatchError},
-    traits::{Currency, ExistenceRequirement, Get, Imbalance, WithdrawReasons},
+    traits::{
+        fungible::{Balanced, Credit, Inspect},
+        tokens::{Fortitude, Precision, Preservation},
+        Get, Imbalance,
+    },
 };
 
 use super::{Config, CurrencySwap};
@@ -38,9 +42,9 @@ impl<T: Config> primitives_currency_swap::CurrencySwap<T::AccountIdFrom, T::Acco
     type Error = Error;
 
     fn swap(
-        incoming_imbalance: <Self::From as Currency<T::AccountIdFrom>>::NegativeImbalance,
+        incoming_imbalance: Credit<T::AccountIdFrom, Self::From>,
     ) -> Result<
-        <Self::To as Currency<T::AccountIdTo>>::NegativeImbalance,
+        Credit<T::AccountIdTo, Self::To>,
         primitives_currency_swap::ErrorFor<Self, T::AccountIdFrom, T::AccountIdTo>,
     > {
         let amount = incoming_imbalance.peek();
@@ -48,8 +52,9 @@ impl<T: Config> primitives_currency_swap::CurrencySwap<T::AccountIdFrom, T::Acco
         let outgoing_imbalance = match T::CurrencyTo::withdraw(
             &T::PotTo::get(),
             T::BalanceConverter::convert(amount),
-            WithdrawReasons::TRANSFER,
-            ExistenceRequirement::KeepAlive,
+            Precision::Exact,
+            Preservation::Preserve,
+            Fortitude::Force,
         ) {
             Ok(imbalance) => imbalance,
             Err(error) => {
@@ -60,10 +65,10 @@ impl<T: Config> primitives_currency_swap::CurrencySwap<T::AccountIdFrom, T::Acco
             }
         };
 
-        match T::CurrencyFrom::resolve_into_existing(&T::PotFrom::get(), incoming_imbalance) {
+        match T::CurrencyFrom::resolve(&T::PotFrom::get(), incoming_imbalance) {
             Ok(()) => {}
             Err(imbalance) => {
-                T::CurrencyTo::resolve_creating(&T::PotTo::get(), outgoing_imbalance);
+                T::CurrencyTo::resolve(&T::PotTo::get(), outgoing_imbalance);
                 return Err(primitives_currency_swap::Error {
                     cause: Error::ResolvingIncomingImbalance,
                     incoming_imbalance: imbalance,
@@ -75,8 +80,8 @@ impl<T: Config> primitives_currency_swap::CurrencySwap<T::AccountIdFrom, T::Acco
     }
 
     fn estimate_swapped_balance(
-        balance: <Self::From as Currency<T::AccountIdFrom>>::Balance,
-    ) -> <Self::To as Currency<T::AccountIdTo>>::Balance {
+        balance: <Self::From as Inspect<T::AccountIdFrom>>::Balance,
+    ) -> <Self::To as Inspect<T::AccountIdTo>>::Balance {
         T::BalanceConverter::convert(balance)
     }
 }

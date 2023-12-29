@@ -1,0 +1,145 @@
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/keystore-bioauth-account-id/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-currency-swap/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-dummy-precompiles-code/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/precompile-evm-accounts-mapping/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-bootnodes/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-balanced-currency-swap-bridges-initializer/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/author-ext-api/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-chain-start-moment/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-humanode-session/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-token-claims/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-pot/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/precompile-utils/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/humanode-peer/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/precompile-bioauth/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-vesting/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/robonode-server/Cargo.toml: unused manifest key: dev-dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-evm-accounts-mapping/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/humanode-runtime/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/precompile-native-currency/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/vesting-schedule-linear/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/bioauth-flow-api/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/primitives-auth-ticket/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-chain-properties/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/primitives-ethereum/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-bioauth/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/primitives-liveness-data/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-erc20-support/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/pallet-ethereum-chain-id/Cargo.toml: unused manifest key: dependencies.codec.package
+warning: /Users/dmitrylavrenov/humanode/humanode/crates/precompile-currency-swap/Cargo.toml: unused manifest key: dependencies.codec.package
+   Compiling humanode-runtime v0.1.0 (/Users/dmitrylavrenov/humanode/humanode/crates/humanode-runtime)
+    Checking pallet-pot v0.1.0 (/Users/dmitrylavrenov/humanode/humanode/crates/pallet-pot)
+warning: missing documentation for a struct
+   --> crates/pallet-pot/src/lib.rs:216:1
+    |
+216 | pub struct OnUnbalancedOverCredit<T, I>(Pallet<T, I>);
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: requested on the command line with `-W missing-docs`
+
+warning: unused `Result` that must be used
+   --> crates/pallet-pot/src/lib.rs:222:9
+    |
+222 |         T::FungibleAsset::resolve(&Pallet::<T, I>::account_id(), amount);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+    = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+    |
+222 |         let _ = T::FungibleAsset::resolve(&Pallet::<T, I>::account_id(), amount);
+    |         +++++++
+
+warning: `pallet-pot` (lib) generated 2 warnings
+error: failed to run custom build command for `humanode-runtime v0.1.0 (/Users/dmitrylavrenov/humanode/humanode/crates/humanode-runtime)`
+
+Caused by:
+  process didn't exit successfully: `/Users/dmitrylavrenov/humanode/humanode/target/debug/build/humanode-runtime-05e5ccf412b61116/build-script-build` (exit status: 1)
+  --- stdout
+  Information that should be included in a bug report.
+  Executing build command: env -u CARGO_ENCODED_RUSTFLAGS -u CARGO_TARGET_DIR RUSTFLAGS="-C target-cpu=mvp -C target-feature=-sign-ext -C link-arg=--export-table -C link-arg=--import-memory -Clink-arg=--export=__heap_base -C target-cpu=mvp -C target-feature=-sign-ext  " SKIP_WASM_BUILD="" "/Users/dmitrylavrenov/.rustup/toolchains/nightly-2023-10-08-aarch64-apple-darwin/bin/cargo" "rustc" "--target=wasm32-unknown-unknown" "--manifest-path=/Users/dmitrylavrenov/humanode/humanode/target/debug/wbuild/humanode-runtime/Cargo.toml" "--color=always" "--profile" "release"
+  Using rustc version: rustc 1.75.0-nightly (97c81e1b5 2023-10-07)
+
+
+  --- stderr
+  warning: /Users/dmitrylavrenov/humanode/humanode/crates/humanode-runtime/Cargo.toml: unused manifest key: dependencies.codec.package
+  warning: associated function `issue_validators_set_init` is never used
+     --> /Users/dmitrylavrenov/humanode/humanode/crates/pallet-bioauth/src/lib.rs:665:12
+      |
+  564 |     impl<T: Config> Pallet<T> {
+      |     ------------------------- associated function in this implementation
+  ...
+  665 |         fn issue_validators_set_init(
+      |            ^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: `#[warn(dead_code)]` on by default
+
+  warning: `pallet-bioauth` (lib) generated 1 warning
+  warning: unused import: `CheckedAdd`
+    --> /Users/dmitrylavrenov/humanode/humanode/crates/pallet-token-claims/src/lib.rs:45:45
+     |
+  45 |     use frame_support::sp_runtime::traits::{CheckedAdd, Zero};
+     |                                             ^^^^^^^^^^
+     |
+     = note: `#[warn(unused_imports)]` on by default
+
+  warning: unused import: `Zero`
+    --> /Users/dmitrylavrenov/humanode/humanode/crates/pallet-token-claims/src/lib.rs:45:57
+     |
+  45 |     use frame_support::sp_runtime::traits::{CheckedAdd, Zero};
+     |                                                         ^^^^
+
+  warning: `pallet-token-claims` (lib) generated 2 warnings (run `cargo fix --lib -p pallet-token-claims` to apply 1 suggestion)
+  warning: unused `Result` that must be used
+     --> /Users/dmitrylavrenov/humanode/humanode/crates/pallet-pot/src/lib.rs:222:9
+      |
+  222 |         T::FungibleAsset::resolve(&Pallet::<T, I>::account_id(), amount);
+      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+      = note: `#[warn(unused_must_use)]` on by default
+  help: use `let _ = ...` to ignore the resulting value
+      |
+  222 |         let _ = T::FungibleAsset::resolve(&Pallet::<T, I>::account_id(), amount);
+      |         +++++++
+
+  warning: `pallet-pot` (lib) generated 1 warning
+     Compiling humanode-runtime v0.1.0 (/Users/dmitrylavrenov/humanode/humanode/crates/humanode-runtime)
+  error[E0277]: the trait bound `pallet_evm_balances::Pallet<Runtime>: hidden_include::traits::fungible::Mutate<sp_core::H160>` is not satisfied
+     --> /Users/dmitrylavrenov/humanode/humanode/crates/humanode-runtime/src/lib.rs:435:26
+      |
+  435 |     type FungibleAsset = EvmBalances;
+      |                          ^^^^^^^^^^^ the trait `hidden_include::traits::fungible::Mutate<sp_core::H160>` is not implemented for `pallet_evm_balances::Pallet<Runtime>`
+      |
+      = help: the following other types implement trait `hidden_include::traits::fungible::Mutate<AccountId>`:
+                <pallet_balances::Pallet<T, I> as hidden_include::traits::fungible::Mutate<<T as frame_system::Config>::AccountId>>
+                <hidden_include::traits::fungible::ItemOf<F, A, AccountId> as hidden_include::traits::fungible::Mutate<AccountId>>
+  note: required by a bound in `pallet_pot::Config::FungibleAsset`
+     --> /Users/dmitrylavrenov/humanode/humanode/crates/pallet-pot/src/lib.rs:77:15
+      |
+  73  |         type FungibleAsset: Currency<<Self as Config<I>>::AccountId>
+      |              ------------- required by a bound in this associated type
+  ...
+  77  |             + Mutate<<Self as Config<I>>::AccountId, Balance = BalanceOf<Self, I>>;
+      |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `Config::FungibleAsset`
+
+  error[E0277]: the trait bound `pallet_evm_balances::Pallet<Runtime>: hidden_include::traits::fungible::Balanced<sp_core::H160>` is not satisfied
+     --> /Users/dmitrylavrenov/humanode/humanode/crates/humanode-runtime/src/lib.rs:435:26
+      |
+  435 |     type FungibleAsset = EvmBalances;
+      |                          ^^^^^^^^^^^ the trait `hidden_include::traits::fungible::Balanced<sp_core::H160>` is not implemented for `pallet_evm_balances::Pallet<Runtime>`
+      |
+      = help: the following other types implement trait `hidden_include::traits::fungible::Balanced<AccountId>`:
+                <pallet_balances::Pallet<T, I> as hidden_include::traits::fungible::Balanced<<T as frame_system::Config>::AccountId>>
+                <hidden_include::traits::fungible::ItemOf<F, A, AccountId> as hidden_include::traits::fungible::Balanced<AccountId>>
+  note: required by a bound in `pallet_pot::Config::FungibleAsset`
+     --> /Users/dmitrylavrenov/humanode/humanode/crates/pallet-pot/src/lib.rs:75:15
+      |
+  73  |         type FungibleAsset: Currency<<Self as Config<I>>::AccountId>
+      |              ------------- required by a bound in this associated type
+  74  |             + Inspect<<Self as Config<I>>::AccountId, Balance = BalanceOf<Self, I>>
+  75  |             + Balanced<<Self as Config<I>>::AccountId, Balance = BalanceOf<Self, I>>
+      |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `Config::FungibleAsset`
+
+  For more information about this error, try `rustc --explain E0277`.
+  error: could not compile `humanode-runtime` (lib) due to 2 previous errors

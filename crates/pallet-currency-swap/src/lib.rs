@@ -2,7 +2,10 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::traits::{fungible::Inspect, tokens::Provenance, Currency};
+use frame_support::traits::{
+    fungible::{Balanced, Inspect},
+    tokens::{Fortitude, Precision, Preservation, Provenance},
+};
 pub use pallet::*;
 use primitives_currency_swap::CurrencySwap as CurrencySwapT;
 pub use weights::*;
@@ -25,7 +28,7 @@ type FromCurrencyOf<T> = <<T as Config>::CurrencySwap as CurrencySwapT<
 /// Utility alias for easy access to the [`Currency::Balance`] of
 /// the [`primitives_currency_swap::CurrencySwap::From`] type.
 type FromBalanceOf<T> =
-    <FromCurrencyOf<T> as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+    <FromCurrencyOf<T> as Inspect<<T as frame_system::Config>::AccountId>>::Balance;
 
 /// Utility alias for easy access to [`primitives_currency_swap::CurrencySwap::To`] type from a given config.
 type ToCurrencyOf<T> = <<T as Config>::CurrencySwap as CurrencySwapT<
@@ -35,7 +38,7 @@ type ToCurrencyOf<T> = <<T as Config>::CurrencySwap as CurrencySwapT<
 
 /// Utility alias for easy access to the [`Currency::Balance`] of
 /// the [`primitives_currency_swap::CurrencySwap::To`] type.
-type ToBalanceOf<T> = <ToCurrencyOf<T> as Currency<<T as Config>::AccountIdTo>>::Balance;
+type ToBalanceOf<T> = <ToCurrencyOf<T> as Inspect<<T as Config>::AccountIdTo>>::Balance;
 
 // We have to temporarily allow some clippy lints. Later on we'll send patches to substrate to
 // fix them at their end.
@@ -107,7 +110,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
 
             with_storage_layer(move || {
-                Self::do_swap(who, to, amount, ExistenceRequirement::AllowDeath)?;
+                Self::do_swap(who, to, amount, Preservation::Expendable)?;
 
                 Ok(())
             })
@@ -124,7 +127,7 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
 
             with_storage_layer(move || {
-                Self::do_swap(who, to, amount, ExistenceRequirement::KeepAlive)?;
+                Self::do_swap(who, to, amount, Preservation::Preserve)?;
 
                 Ok(())
             })
@@ -137,7 +140,7 @@ pub mod pallet {
             who: T::AccountId,
             to: T::AccountIdTo,
             amount: FromBalanceOf<T>,
-            existence_requirement: ExistenceRequirement,
+            preservation: Preservation,
         ) -> DispatchResult {
             let estimated_swapped_balance = T::CurrencySwap::estimate_swapped_balance(amount);
             ToCurrencyOf::<T>::can_deposit(&to, estimated_swapped_balance, Provenance::Extant)
@@ -146,20 +149,21 @@ pub mod pallet {
             let withdrawed_imbalance = FromCurrencyOf::<T>::withdraw(
                 &who,
                 amount,
-                WithdrawReasons::TRANSFER,
-                existence_requirement,
+                Precision::Exact,
+                preservation,
+                Fortitude::Force,
             )?;
             let withdrawed_amount = withdrawed_imbalance.peek();
 
             let deposited_imbalance =
                 T::CurrencySwap::swap(withdrawed_imbalance).map_err(|error| {
                     // Here we undo the withdrawal to avoid having a dangling imbalance.
-                    FromCurrencyOf::<T>::resolve_creating(&who, error.incoming_imbalance);
+                    FromCurrencyOf::<T>::resolve(&who, error.incoming_imbalance);
                     error.cause.into()
                 })?;
             let deposited_amount = deposited_imbalance.peek();
 
-            ToCurrencyOf::<T>::resolve_creating(&to, deposited_imbalance);
+            ToCurrencyOf::<T>::resolve(&to, deposited_imbalance);
 
             Self::deposit_event(Event::BalancesSwapped {
                 from: who,

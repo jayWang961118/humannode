@@ -3,7 +3,11 @@
 
 use frame_support::{
     sp_runtime::{traits::Convert, DispatchError},
-    traits::{Currency, ExistenceRequirement, Get, Imbalance, WithdrawReasons},
+    traits::{
+        fungible::{Balanced, Credit, Inspect},
+        tokens::{Fortitude, Precision, Preservation},
+        Get, Imbalance,
+    },
 };
 
 use super::{Config, CurrencySwap};
@@ -19,9 +23,9 @@ impl<T: Config> primitives_currency_swap::CurrencySwap<T::AccountIdFrom, T::Acco
     type Error = DispatchError;
 
     fn swap(
-        incoming_imbalance: <Self::From as Currency<T::AccountIdFrom>>::NegativeImbalance,
+        incoming_imbalance: Credit<T::AccountIdFrom, Self::From>,
     ) -> Result<
-        <Self::To as Currency<T::AccountIdTo>>::NegativeImbalance,
+        Credit<T::AccountIdTo, Self::To>,
         primitives_currency_swap::ErrorFor<Self, T::AccountIdFrom, T::AccountIdTo>,
     > {
         let amount = incoming_imbalance.peek();
@@ -29,8 +33,9 @@ impl<T: Config> primitives_currency_swap::CurrencySwap<T::AccountIdFrom, T::Acco
         let outgoing_imbalance = match T::CurrencyTo::withdraw(
             &T::PotTo::get(),
             T::BalanceConverter::convert(amount),
-            WithdrawReasons::TRANSFER,
-            ExistenceRequirement::AllowDeath,
+            Precision::Exact,
+            Preservation::Expendable,
+            Fortitude::Force,
         ) {
             Ok(imbalance) => imbalance,
             Err(error) => {
@@ -41,14 +46,14 @@ impl<T: Config> primitives_currency_swap::CurrencySwap<T::AccountIdFrom, T::Acco
             }
         };
 
-        T::CurrencyFrom::resolve_creating(&T::PotFrom::get(), incoming_imbalance);
+        T::CurrencyFrom::resolve(&T::PotFrom::get(), incoming_imbalance);
 
         Ok(outgoing_imbalance)
     }
 
     fn estimate_swapped_balance(
-        balance: <Self::From as Currency<T::AccountIdFrom>>::Balance,
-    ) -> <Self::To as Currency<T::AccountIdTo>>::Balance {
+        balance: <Self::From as Inspect<T::AccountIdFrom>>::Balance,
+    ) -> <Self::To as Inspect<T::AccountIdTo>>::Balance {
         T::BalanceConverter::convert(balance)
     }
 }
