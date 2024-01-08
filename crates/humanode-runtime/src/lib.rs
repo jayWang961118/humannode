@@ -404,48 +404,57 @@ impl pallet_pot::Config<PotInstanceTreasury> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
     type PalletId = TreasuryPotPalletId;
-    type Currency = Balances;
+    type FungibleAsset = Balances;
 }
 
 impl pallet_pot::Config<PotInstanceFees> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
     type PalletId = FeesPotPalletId;
-    type Currency = Balances;
+    type FungibleAsset = Balances;
 }
 
 impl pallet_pot::Config<PotInstanceTokenClaims> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
     type PalletId = TokenClaimsPotPalletId;
-    type Currency = Balances;
+    type FungibleAsset = Balances;
 }
 
 impl pallet_pot::Config<PotInstanceNativeToEvmSwapBridge> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
     type PalletId = NativeToEvmSwapBridgePotPalletId;
-    type Currency = Balances;
+    type FungibleAsset = Balances;
 }
 
 impl pallet_pot::Config<PotInstanceEvmToNativeSwapBridge> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = EvmAccountId;
     type PalletId = EvmToNativeSwapBridgePotPalletId;
-    type Currency = EvmBalances;
+    type FungibleAsset = EvmBalances;
 }
 
 impl pallet_balances::Config for Runtime {
-    type MaxLocks = ConstU32<50>;
-    type MaxReserves = ();
+    /// The ubiquitous event type.
+    type RuntimeEvent = RuntimeEvent;
     type ReserveIdentifier = [u8; 8];
     /// The type for recording an account's balance.
     type Balance = Balance;
-    /// The ubiquitous event type.
-    type RuntimeEvent = RuntimeEvent;
-    type DustRemoval = TreasuryPot;
+    type DustRemoval = pallet_pot::OnUnbalancedOverCredit<Self, PotInstanceTreasury>;
     type ExistentialDeposit = ConstU128<500>;
     type AccountStore = System;
+    type MaxLocks = ConstU32<50>;
+    // Until you introduce pallets which use holds and freezes,
+    // then these can safely be set to ConstU32<0> in the case of `MaxHolds`, `MaxFreezes`
+    // and () in the case of `HoldIdentifier`, `FreezeIdentifier`.
+    //
+    // <https://github.com/paritytech/substrate/pull/12951>.
+    type HoldIdentifier = ();
+    type FreezeIdentifier = ();
+    type MaxReserves = ();
+    type MaxHolds = ConstU32<0>;
+    type MaxFreezes = ConstU32<0>;
     type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
 }
 
