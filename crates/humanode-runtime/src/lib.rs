@@ -404,28 +404,28 @@ impl pallet_pot::Config<PotInstanceTreasury> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
     type PalletId = TreasuryPotPalletId;
-    type FungibleAsset = Balances;
+    type Currency = Balances;
 }
 
 impl pallet_pot::Config<PotInstanceFees> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
     type PalletId = FeesPotPalletId;
-    type FungibleAsset = Balances;
+    type Currency = Balances;
 }
 
 impl pallet_pot::Config<PotInstanceTokenClaims> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
     type PalletId = TokenClaimsPotPalletId;
-    type FungibleAsset = Balances;
+    type Currency = Balances;
 }
 
 impl pallet_pot::Config<PotInstanceNativeToEvmSwapBridge> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
     type PalletId = NativeToEvmSwapBridgePotPalletId;
-    type FungibleAsset = Balances;
+    type Currency = Balances;
 }
 
 impl pallet_pot::Config<PotInstanceEvmToNativeSwapBridge> for Runtime {
