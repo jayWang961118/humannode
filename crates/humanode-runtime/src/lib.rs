@@ -432,7 +432,7 @@ impl pallet_pot::Config<PotInstanceEvmToNativeSwapBridge> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AccountId = EvmAccountId;
     type PalletId = EvmToNativeSwapBridgePotPalletId;
-    type FungibleAsset = EvmBalances;
+    type Currency = EvmBalances;
 }
 
 impl pallet_balances::Config for Runtime {
