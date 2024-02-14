@@ -562,7 +562,7 @@
     - default
     - std
     - u64_backend
-- name: curve25519-dalek 4.1.2
+- name: curve25519-dalek 4.0.0
   features:
     - alloc
     - default
@@ -974,8 +974,10 @@
 - name: ff 0.13.0
   features:
     - alloc
-- name: fiat-crypto 0.2.6
-  features: []
+- name: fiat-crypto 0.1.20
+  features:
+    - default
+    - std
 - name: file-per-thread-logger 0.1.6
   features: []
 - name: filetime 0.2.23
