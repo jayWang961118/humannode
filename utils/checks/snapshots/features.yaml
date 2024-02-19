@@ -389,7 +389,7 @@
     - clang_6_0
     - libloading
     - runtime
-- name: clap 4.5.0
+- name: clap 4.5.1
   features:
     - color
     - default
@@ -401,7 +401,7 @@
     - string
     - suggestions
     - usage
-- name: clap_builder 4.5.0
+- name: clap_builder 4.5.1
   features:
     - color
     - deprecated
@@ -3455,7 +3455,7 @@
     - quote
     - visit
     - visit-mut
-- name: syn 2.0.48
+- name: syn 2.0.49
   features:
     - clone-impls
     - default
