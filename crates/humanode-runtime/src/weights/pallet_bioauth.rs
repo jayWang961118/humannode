@@ -17,12 +17,12 @@ impl<T: frame_system::Config> pallet_bioauth::WeightInfo for WeightInfo<T> {
     // Proof Size summary in bytes:
     //  Measured:  `183 + a * (40 ±0) + n * (19 ±0)`
     //  Estimated: `0`
-    // Minimum execution time: 154_000_000 picoseconds.
-    Weight::from_parts(154_000_000, 0)
-      // Standard Error: 40_799_410
-      .saturating_add(Weight::from_parts(32_248_192, 0).saturating_mul(a.into()))
-      // Standard Error: 4_078
-      .saturating_add(Weight::from_parts(113_249, 0).saturating_mul(n.into()))
+    // Minimum execution time: 121_000_000 picoseconds.
+    Weight::from_parts(121_000_000, 0)
+      // Standard Error: 4_071_928
+      .saturating_add(Weight::from_parts(1_149_918, 0).saturating_mul(a.into()))
+      // Standard Error: 407
+      .saturating_add(Weight::from_parts(112_393, 0).saturating_mul(n.into()))
       .saturating_add(T::DbWeight::get().reads(4))
       .saturating_add(T::DbWeight::get().writes(2))
   }
@@ -41,7 +41,7 @@ impl<T: frame_system::Config> pallet_bioauth::WeightInfo for WeightInfo<T> {
     //  Measured:  `141 + a * (40 ±0)`
     //  Estimated: `0`
     // Minimum execution time: 6_000_000 picoseconds.
-    Weight::from_parts(116_000_000, 0)
+    Weight::from_parts(85_000_000, 0)
       .saturating_add(T::DbWeight::get().reads(2))
       .saturating_add(T::DbWeight::get().writes(1))
   }
