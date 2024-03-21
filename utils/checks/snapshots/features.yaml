@@ -137,7 +137,7 @@
   features:
     - default
     - std
-- name: async-trait 0.1.77
+- name: async-trait 0.1.78
   features: []
 - name: asynchronous-codec 0.6.2
   features:
@@ -2604,7 +2604,7 @@
     - unicode-segment
 - name: region 3.0.0
   features: []
-- name: reqwest 0.11.26
+- name: reqwest 0.11.27
   features:
     - __tls
     - default
@@ -3457,7 +3457,7 @@
     - quote
     - visit
     - visit-mut
-- name: syn 2.0.52
+- name: syn 2.0.53
   features:
     - clone-impls
     - default
@@ -3813,7 +3813,7 @@
 - name: utf8parse 0.2.1
   features:
     - default
-- name: uuid 1.7.0
+- name: uuid 1.8.0
   features:
     - default
     - rng
